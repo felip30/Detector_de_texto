@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis de Desinformación y Deepfake de Texto</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Análisis de Desinformación y Deepfake de Texto</h1>
+    <div class="container">
+        <label for="texto">Ingresa el texto del artículo para analizar:</label>
+        <textarea id="texto" placeholder="Pega aquí el texto sospechoso..." required></textarea>
+        <button onclick="analizarTexto()">Analizar Entropía y Perplejidad</button>
+        <div id="resultado"></div>
+    </div>
+
+    <script>
+        function analizarTexto() {
+            const texto = document.getElementById('texto').value.trim();
+            if (!texto) {
+                document.getElementById('resultado').innerHTML = '<p style="color: #e74c3c;">Por favor, ingresa un texto para analizar.</p>';
+                return;
+            }
+
+            // Procesar el texto: dividir en palabras y calcular frecuencias
+            const palabras = texto.toLowerCase().split(/\s+/).filter(word => word.length > 0);
+            const totalPalabras = palabras.length;
+            const frecuencia = {};
+            palabras.forEach(palabra => {
+                frecuencia[palabra] = (frecuencia[palabra] || 0) + 1;
+            });
+
+            // Calcular entropía de Shannon
+            let entropia = 0;
+            for (const palabra in frecuencia) {
+                const p = frecuencia[palabra] / totalPalabras;
+                entropia -= p * Math.log2(p);
+            }
+
+            // Perplejidad aproximada (2^entropia)
+            const perplejidad = Math.pow(2, entropia);
+
+            // Clasificación basada en entropía (umbral arbitrario para simulación)
+            let clasificacion = '';
+            let clase = '';
+            if (entropia < 4) {
+                clasificacion = 'Probablemente generado por IA (baja diversidad, posible deepfake).';
+                clase = 'probable-ia';
+            } else if (entropia > 6) {
+                clasificacion = 'Probablemente escrito por humano (alta diversidad).';
+                clase = 'probable-humano';
+            } else {
+                clasificacion = 'Indeterminado (entropía media).';
+                clase = '';
+            }
+
+            // Mostrar resultado
+            document.getElementById('resultado').innerHTML = `
+                <p><strong>Entropía calculada:</strong> ${entropia.toFixed(2)} bits</p>
+                <p><strong>Perplejidad aproximada:</strong> ${perplejidad.toFixed(2)}</p>
+                <p class="${clase}"><strong>Resultado:</strong> ${clasificacion}</p>
+                <p style="font-size: 0.9em; color: #777;">Nota: Esto es una simulación. Textos de IA como GPT-4 suelen tener entropía baja debido a patrones uniformes.</p>
+            `;
+        }
+    </script>
+</body>
+</html>
